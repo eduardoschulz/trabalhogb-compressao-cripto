@@ -18,7 +18,6 @@ class Golomb:
             dividendo = ord(c)
             quociente = dividendo // divisor  # Calcular quociente
             resto = dividendo % divisor  # Calcular resto
-
             prefixo = '0' * quociente + '1'  # Gerar prefixo
 
         # Calcular número de bits necessários para representar o sufixo
@@ -29,26 +28,39 @@ class Golomb:
             if resto < threshold:  # Determinar sufixo com base no limiar
                 sufixo = format(resto, f'0{k-1}b')  # Gerar sufixo
             else:
-                resto += threshold  # Ajustar o resto para o caso em que ele é maior ou igual ao limiar
+                if threshold > 0:
+                    resto = 2 * resto - threshold  # Ajustar o resto para o caso em que ele é maior ou igual ao limiar
                 sufixo = format(resto, f'0{k}b')  # Gerar sufixo
             output += prefixo + sufixo
         return output
 
     @staticmethod
-    def golomb_decode(codigo, k):
+    def golomb_decode(codigo, divisor):
         resultado = ""
         pos = 0
+        k = math.ceil(math.log2(divisor))
+        threshold = (2 ** k) - divisor
+
         while pos < len(codigo):
             quociente = 0
             while codigo[pos] == '0':
                 quociente += 1
                 pos += 1
-            pos += 1
+            pos += 1 # Pular o '1' que separa o prefixo do sufixo
+
             num = 0
-            for i in range(int(math.log2(k))):
-                num += int(codigo[pos])
+            for i in range(k - 1):
                 num *= 2
+                num += int(codigo[pos])
                 pos += 1
-            num += 2**quociente
+
+            if num >= threshold:
+                num *= 2
+                num += int(codigo[pos])
+                pos += 1
+                if threshold > 0:
+                    num = num - threshold
+
+            num += quociente * divisor 
             resultado += chr(num)
         return resultado

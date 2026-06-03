@@ -4,58 +4,50 @@ class Fibonacci:
         return self
 
     @staticmethod
-    def fibonacci_encode(n):
-        if n <= 0:
-            raise ValueError("Fibonacci só codifica inteiros positivos")
+    def fibonacci_encode(text):
+        bits = []
+        for ch in text:
+            n = ord(ch)
+ 
+            fib = [1, 2]
+            while fib[-1] <= n:
+                fib.append(fib[-1] + fib[-2])
+            fib = fib[:-1]
+ 
+            code = []
+            for f in reversed(fib):
+                if f <= n:
+                    code.append('1')
+                    n -= f
+                else:
+                    code.append('0')
+ 
+            code.reverse()
+            bits.append(''.join(code) + '1')
+ 
+        return ''.join(bits)
 
-        fib = [1, 2]
-
-        # Gera Fibonacci até passar de n
-        while fib[-1] <= n:
-            fib.append(fib[-1] + fib[-2])
-
-        fib = fib[:-1]  # remove o maior que n
-
-        code = []
-
-        # Monta código (Zeckendorf)
-        for f in reversed(fib):
-            if f <= n:
-                code.append('1')
-                n -= f
-            else:
-                code.append('0')
-
-        code.reverse()
-
-        return ''.join(code) + '1'  # vira "11" no final
 
     @staticmethod
     def fibonacci_decode(code):
         fib = [1, 2]
-        result = []
+        chars = []
         current = []
-
+ 
         i = 0
         while i < len(code):
             current.append(code[i])
-
-            # Detecta "11"
+ 
             if len(current) >= 2 and current[-1] == '1' and current[-2] == '1':
-                current = current[:-1]  # remove último "1"
-
-                # Gera Fibonacci suficiente
+                current = current[:-1]
+ 
                 while len(fib) < len(current):
                     fib.append(fib[-1] + fib[-2])
-
-                num = 0
-                for j in range(len(current)):
-                    if current[j] == '1':
-                        num += fib[j]
-
-                result.append(num)
+ 
+                num = sum(fib[j] for j, b in enumerate(current) if b == '1')
+                chars.append(chr(num))
                 current = []
-
+ 
             i += 1
-
-        return result
+ 
+        return ''.join(chars)
