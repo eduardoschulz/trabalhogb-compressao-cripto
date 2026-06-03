@@ -14,12 +14,10 @@ class Golomb:
     @staticmethod
     def golomb_encode(mensagem, divisor):  # Codificação Golomb
         output = ''
-        codado = ''
         for c in mensagem:
             dividendo = ord(c)
             quociente = dividendo // divisor  # Calcular quociente
             resto = dividendo % divisor  # Calcular resto
-            codado += f'{dividendo} '  # Armazenar valor codificado para debug
             prefixo = '0' * quociente + '1'  # Gerar prefixo
 
         # Calcular número de bits necessários para representar o sufixo

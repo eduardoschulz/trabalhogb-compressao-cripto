@@ -93,3 +93,9 @@ class NoHuffman:
                 no_atual = raiz                # volta à raiz
 
         return ''.join(resultado)
+
+    def testar(self, texto):
+        """Codifica e decodifica uma string, printando os resultados."""
+        codigo, tabela, raiz = self.huffman_encode(texto)
+        print(f"Huffman Codificado: {codigo}")
+        print(f"Huffman Decodificado: {self.huffman_decode(codigo, raiz)}")
