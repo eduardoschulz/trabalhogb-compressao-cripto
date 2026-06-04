@@ -1,4 +1,4 @@
-# Trabalho Prático 2 - Teoria da Informação: Computação e Criptografia
+# Trabalho Prático 2 - Teoria da Informação: Compressão e Criptografia
 # Alunos: Gabriel Cezar Walber, Renan Zampeze, Arthur Wild, Eduardo Schulz
 import socket
 

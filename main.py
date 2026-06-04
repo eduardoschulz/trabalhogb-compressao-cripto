@@ -1,4 +1,4 @@
-# Trabalho Prático 1 - Teoria da Informação: Computação e Criptografia
+# Trabalho Prático 1 - Teoria da Informação: Compressão e Criptografia
 # Alunos: Gabriel Cezar Walber, Renan Zampeze, Arthur Wild, Eduardo Schulz
 import math
 import heapq
