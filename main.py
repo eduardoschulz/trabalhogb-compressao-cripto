@@ -1,4 +1,4 @@
-# Trabalho Prático 1 - Teoria da Informação: Computação e Criptografia
+# Trabalho Prático 1 - Teoria da Informação: Compressão e Criptografia
 # Alunos: Gabriel Cezar Walber, Renan Zampeze, Arthur Wild, Eduardo Schulz
 import math
 import heapq
@@ -286,6 +286,147 @@ def inserir_erro(codigo: str) -> str:
             
     return ''.join(lista_bits)
 
+def repeticao_encode(bits, r): # Codificação código de repetição Ri
+    resultado = ""
+
+    for bit in bits:
+        resultado += bit * r # Repete cada bit R vezes
+
+    return resultado
+
+def repeticao_decode(codigo, r): # Decodificação código de repetição Ri
+    resultado = ""
+
+    print("\nDecodificação bloco a bloco:")
+
+    for i in range(0, len(codigo), r): # Itera sobre a string de bits em blocos de R
+        bloco = codigo[i:i+r] # Extrai o bloco de R bits
+
+        zeros = bloco.count('0')
+        uns = bloco.count('1')
+
+        if uns > zeros: # Determina o valor do bit decodificado com base na maioria dos bits no bloco
+            bit = '1'
+            resultado += '1'
+        else:
+            bit = '0'
+            resultado += '0'
+
+        if i + r < len(codigo):
+            print(f"{bloco} -> {bit}", end=" / ")
+        else:
+            print(f"{bloco} -> {bit}")
+
+    return resultado
+
+def validar_repeticao(r): # Valida se R é ímpar
+    return r > 0 and r % 2 == 1
+
+def texto_para_bits(texto): # Converte a entrada para bits, representando cada caractere como um byte de 8 bits
+    return ''.join(format(ord(c), '08b') for c in texto) # Converte cada caractere para ASCII com uma representação de 8 bits, após junta todos em uma única string
+
+def bits_para_texto(bits): # Converte os bits de volta para texto, agrupando em bytes de 8 bits e convertendo cada byte para um caractere
+    resultado = ""
+
+    for i in range(0, len(bits), 8): # Itera sobre a string de bits em passos de 8
+        byte = bits[i:i+8] # Agrupa os bits em bytes de 8 bits
+
+        if len(byte) == 8: # Verifica se o byte tem 8 bits completos
+            resultado += chr(int(byte, 2)) # Converte o byte para char e adiciona ao resultado
+
+    return resultado
+
+def hamming74_encode(bits):
+    resultado = ""
+
+    while len(bits) % 4 != 0: # Preenche com zeros à direita para garantir que o número de bits seja múltiplo de 4
+        bits += '0'
+
+    for i in range(0, len(bits), 4):
+
+        d1, d2, d3, d4 = map(int, bits[i:i+4])
+
+        # Calcula os bits de paridade usando XOR
+        p1 = d1 ^ d2 ^ d3
+        p2 = d2 ^ d3 ^ d4 
+        p3 = d1 ^ d3 ^ d4
+
+        bloco = (
+            str(d1) +
+            str(d2) +
+            str(d3) +
+            str(d4) +
+            str(p1) +
+            str(p2) +
+            str(p3)
+        )
+
+        print(f"\nBloco de dados: {d1}{d2}{d3}{d4} -> Paridades: {p1}{p2}{p3} -> Bloco codificado: {bloco}")
+        resultado += bloco
+
+    return resultado
+
+def hamming74_decode(codigo):
+
+    dados = ""
+    posicoes_erro = []
+
+    # Tabela para identificar a posição do bit com erro
+    tabela_erros = {
+        (1,0,1): (0, "D1"),
+        (1,1,0): (1, "D2"),
+        (1,1,1): (2, "D3"),
+        (0,1,1): (3, "D4"),
+        (1,0,0): (4, "P1"),
+        (0,1,0): (5, "P2"),
+        (0,0,1): (6, "P3")
+    }
+
+    for i in range(0, len(codigo), 7):
+
+        bloco = list(codigo[i:i+7]) # Extrai um bloco de 7 bits (4 dados + 3 paridade)
+
+        if len(bloco) < 7:
+            break
+
+        d1 = int(bloco[0])
+        d2 = int(bloco[1])
+        d3 = int(bloco[2])
+        d4 = int(bloco[3])
+        p1 = int(bloco[4])
+        p2 = int(bloco[5])
+        p3 = int(bloco[6])
+
+        # Calculo para detecção de erros usando XOR
+        s1 = p1 ^ d1 ^ d2 ^ d3
+        s2 = p2 ^ d2 ^ d3 ^ d4
+        s3 = p3 ^ d1 ^ d3 ^ d4
+
+        verificacao = (s1, s2, s3) # Se for (0,0,0), não há erro. Caso contrário, indica a posição do bit com erro.
+
+        if verificacao != (0,0,0): # Se houver erro, corrige o bit identificado usando a tabela de erros
+
+            indice, nome_bit = tabela_erros[verificacao]
+
+            bloco[indice] = ( # Correção do bit com erro, flipando o bit identificado
+                '1'
+                if bloco[indice] == '0'
+                else '0'
+            )
+
+            posicoes_erro.append(i + indice) # Posição do bit corrigido
+
+            print(f"Erro detectado no bloco {i//7 + 1}, {nome_bit}") # Exibe o bloco e o bit onde o erro foi detectado
+
+        dados += (
+            bloco[0] +
+            bloco[1] +
+            bloco[2] +
+            bloco[3]
+        )
+
+    return dados, posicoes_erro
+
 def menu():
     while True:
         print("\n===== ESCOLHA UMA OPÇÃO =====")
@@ -293,77 +434,120 @@ def menu():
         print("2 - Elias-Gamma")
         print("3 - Fibonacci")
         print("4 - Huffman")
+        print("5 - Código de Repetição Ri")
+        print("6 - Hamming (7,4)")
         print("0 - Sair")
 
         op = input("Escolha o método: ")
 
         try:
             if op == '1':
-                n = input("Digite a mensagem: ")
+                n = input("Digite o texto a ser codificado:\n")
                 k = int(input("Digite o número k (potência de 2): "))
 
                 if not validar_entrada_golomb(k):
-                    print("\nEntrada inválida! K deve ser uma potência de 2.")
+                    print("\nEntrada inválida: K deve ser uma potência de 2.")
                     continue  # Se a entrada for inválida, retorna ao menu
                 print("\nEntrada válida!")
 
                 codigo = golomb_encode(n, k)
                 if codigo is not None:
-                    print(f"\nResultado: {codigo}")
+                    print(f"\nResultado:\n{codigo}")
                 codigo = inserir_erro(codigo)
-                print(f"Resultado com erro: {codigo}")
+                print(f"Resultado com erro:\n{codigo}")
                 decodificado = golomb_decode(codigo, k)
                 if decodificado:
-                    print(f"Decodificado: {decodificado[0]}")
+                    print(f"Decodificado:\n{decodificado}")
 
             elif op == '2':
                 try:
-                    n = int(input("Digite um número inteiro positivo: "))
+                    m = input("Digite o texto a ser codificado:\n")
  
-                    if n <= 0:
-                        print("Entrada inválida!")
-                        continue
- 
-                    codigo = elias_gamma_encode(n)
-                    print(f"\nCodificado (Elias-Gamma): {codigo}")
+                    codigo = elias_gamma_encode(m)
+                    print(f"\nCodificado (Elias-Gamma):\n{codigo}")
  
                     codigo = inserir_erro(codigo)
-                    print(f"Codificado com erro: {codigo}")
+                    print(f"Codificado com erro:\n{codigo}")
 
                     decodificado = elias_gamma_decode(codigo)
                     if decodificado:
-                        print(f"Decodificado: {decodificado[0]}")
+                        print(f"Decodificado:\n{decodificado}")
 
                 except Exception as e:
-                    print(f"Erro na decodificação: {e}")
+                    print(f"Erro na decodificação:\n{e}")
 
             elif op == '3':
                 try:
-                    n = int(input("Digite um número inteiro positivo: "))
+                    m = input("Digite o texto a ser codificado:\n")
 
-                    if n <= 0:
-                        print("Entrada inválida!")
-                        continue
-
-                    codigo = fibonacci_encode(n)
-                    print(f"\nCodificado (Fibonacci): {codigo}")
+                    codigo = fibonacci_encode(m)
+                    print(f"\nCodificado (Fibonacci):\n{codigo}")
 
                     codigo = inserir_erro(codigo)
-                    print(f"Codificado com erro: {codigo}")
+                    print(f"Codificado com erro:\n{codigo}")
 
                     decodificado = fibonacci_decode(codigo)
                     if decodificado:
-                        print(f"Decodificado: {decodificado[0]}")
+                        print(f"Decodificado:\n{decodificado}")
 
                 except Exception as e:
-                    print(f"Erro na decodificação: {e}")
+                    print(f"Erro na decodificação:\n{e}")
 
 
             elif op == '4':
                 try:
                     huffman_menu()
                 except Exception as e:
-                    print(f"Erro: {e}")
+                    print(f"Erro:\n{e}")
+
+            elif op == '5':
+
+                texto = input("Digite o texto:\n")
+
+                r = int(input("Digite o valor de R (ímpar): "))
+
+                if not validar_repeticao(r): # Validar se R é ímpar
+                    print("R deve ser ímpar.")
+                    continue
+
+                bits = texto_para_bits(texto)
+                print(f"\nBits originais:\n{bits}")
+
+                codigo = repeticao_encode(bits, r)
+                print(f"\nCodificado:\n{codigo}")
+
+                codigo = inserir_erro(codigo)
+                print(f"\nCom erro:\n{codigo}")
+
+                corrigido = repeticao_decode(codigo, r)
+                print(f"\nBits corrigidos:\n{corrigido}")
+
+                mensagem = bits_para_texto(corrigido)
+                print(f"\nMensagem recuperada:\n{mensagem}")
+
+            elif op == '6':
+
+                texto = input("Digite o texto:\n")
+
+                bits = texto_para_bits(texto)
+                print(f"\nBits originais:\n{bits}")
+
+                codigo = hamming74_encode(bits)
+                print(f"\nCodificado Hamming:\n{codigo}")
+
+                codigo = inserir_erro(codigo)
+                print(f"\nCom erro:\n{codigo}")
+
+                corrigido, erros = hamming74_decode(codigo)
+                print(f"\nBits corrigidos:\n{corrigido}")
+
+                if erros:
+                    print(f"Posições corrigidas: {erros}")
+                else:
+                    print("Nenhum erro detectado.")
+
+                mensagem = bits_para_texto(corrigido)
+                print(f"\nMensagem recuperada:\n{mensagem}")
 
             elif op == '0':
                 break
@@ -372,5 +556,5 @@ def menu():
                 print("Opção inválida!")
 
         except Exception as e:
-            print(f"Erro: {e}")
+            print(f"Erro:\n{e}")
 menu()
