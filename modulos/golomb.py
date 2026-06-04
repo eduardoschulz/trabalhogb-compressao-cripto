@@ -29,7 +29,8 @@ class Golomb:
                 sufixo = format(resto, f'0{k-1}b')  # Gerar sufixo
             else:
                 if threshold > 0:
-                    resto = 2 * resto - threshold  # Ajustar o resto para o caso em que ele é maior ou igual ao limiar
+                    # Ajustar o resto para o caso em que ele é maior ou igual ao limiar
+                    resto = 2 * resto - threshold
                 sufixo = format(resto, f'0{k}b')  # Gerar sufixo
             output += prefixo + sufixo
         return output
@@ -46,7 +47,7 @@ class Golomb:
             while codigo[pos] == '0':
                 quociente += 1
                 pos += 1
-            pos += 1 # Pular o '1' que separa o prefixo do sufixo
+            pos += 1  # Pular o '1' que separa o prefixo do sufixo
 
             num = 0
             for i in range(k - 1):
@@ -61,6 +62,6 @@ class Golomb:
                 if threshold > 0:
                     num = num - threshold
 
-            num += quociente * divisor 
+            num += quociente * divisor
             resultado += chr(num)
         return resultado
