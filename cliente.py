@@ -5,7 +5,9 @@ from modulos.golomb import Golomb
 from modulos.eliasgamma import EliasGamma
 from modulos.fibonacci import Fibonacci
 from modulos.huffman import NoHuffman
-from modulos.utils import inserir_erro
+from modulos.repeticao import Repeticao
+from modulos.hamming import Hamming
+from modulos.utils import inserir_erro, texto_para_bits, bits_para_texto
 
 UDP_IP = "127.0.0.1"
 UDP_PORT = 5000
@@ -28,6 +30,8 @@ def menu():
         print("2 - Elias-Gamma")
         print("3 - Fibonacci")
         print("4 - Huffman")
+        print("5 - Código de Repetição Ri")
+        print("6 - Hamming (7,4)")
         print("0 - Sair")
 
         op = input("Escolha o método: ")
@@ -73,6 +77,39 @@ def menu():
                 print(f"Codificado com erro: {codigo}")
                 dump = str({s: c for s, c in tabela.items()})
                 enviar(sock, f"huffman:{dump}|{codigo}")
+
+            elif op == '5':
+                texto = input("Digite o texto:\n")
+                r = int(input("Digite o valor de R (ímpar): "))
+
+                if not Repeticao.validar_repeticao(r):
+                    print("R deve ser ímpar.")
+                    continue
+
+                bits = texto_para_bits(texto)
+                print(f"\nBits originais:\n{bits}")
+
+                codigo = Repeticao.repeticao_encode(bits, r)
+                print(f"\nCodificado:\n{codigo}")
+
+                codigo = inserir_erro(codigo)
+                print(f"\nCom erro:\n{codigo}")
+
+                enviar(sock, f"repeticao:{r}:{codigo}")
+
+            elif op == '6':
+                texto = input("Digite o texto:\n")
+
+                bits = texto_para_bits(texto)
+                print(f"\nBits originais:\n{bits}")
+
+                codigo = Hamming.hamming74_encode(bits)
+                print(f"\nCodificado Hamming:\n{codigo}")
+
+                codigo = inserir_erro(codigo)
+                print(f"\nCom erro:\n{codigo}")
+
+                enviar(sock, f"hamming:{codigo}")
 
             elif op == '0':
                 break

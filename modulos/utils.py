@@ -1,6 +1,19 @@
 from collections import Counter
 
 
+def texto_para_bits(texto):
+    return ''.join(format(ord(c), '08b') for c in texto)
+
+
+def bits_para_texto(bits):
+    resultado = ""
+    for i in range(0, len(bits), 8):
+        byte = bits[i:i+8]
+        if len(byte) == 8:
+            resultado += chr(int(byte, 2))
+    return resultado
+
+
 def inserir_erro(codigo: str) -> str:
     lista_bits = list(codigo)
 
