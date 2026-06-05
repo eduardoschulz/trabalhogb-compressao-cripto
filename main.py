@@ -427,6 +427,49 @@ def hamming74_decode(codigo):
 
     return dados, posicoes_erro
 
+def crc_resto(bits, polinomio="10011"):
+
+    dados = list(bits)
+
+    for i in range(len(bits) - len(polinomio) + 1):
+
+        if dados[i] == '1':
+
+            for j in range(len(polinomio)):
+
+                dados[i + j] = str(
+                    int(dados[i + j]) ^
+                    int(polinomio[j])
+                )
+
+    return ''.join(dados[-4:])
+
+def crc_encode(bits):
+
+    polinomio = "10011"
+
+    mensagem = bits + "0000"
+
+    crc = crc_resto(mensagem, polinomio)
+
+    codeword = bits + crc
+
+    print(f"Dados: {bits}")
+    print(f"CRC:   {crc}")
+    print(f"Codeword: {codeword}")
+
+    return codeword
+
+def crc_decode(codeword):
+
+    polinomio = "10011"
+
+    resto = crc_resto(codeword, polinomio)
+
+    erro = resto != "0000"
+
+    return not erro, resto
+
 def menu():
     while True:
         print("\n===== ESCOLHA UMA OPÇÃO =====")
@@ -436,6 +479,7 @@ def menu():
         print("4 - Huffman")
         print("5 - Código de Repetição Ri")
         print("6 - Hamming (7,4)")
+        print("7 - CRC-4")
         print("0 - Sair")
 
         op = input("Escolha o método: ")
@@ -548,6 +592,26 @@ def menu():
 
                 mensagem = bits_para_texto(corrigido)
                 print(f"\nMensagem recuperada:\n{mensagem}")
+
+            elif op == '7':
+
+                texto = input("Digite o texto:\n")
+
+                bits = texto_para_bits(texto)
+                print(f"\nBits originais:\n{bits}")
+
+                codigo = crc_encode(bits)
+
+                codigo = inserir_erro(codigo)
+                print(f"\nCom erro:\n{codigo}")
+
+                valido, resto = crc_decode(codigo)
+                print(f"\nResto da divisão: {resto}")
+
+                if valido:
+                    print("Nenhum erro detectado.")
+                else:
+                    print("Erro detectado pelo CRC.")
 
             elif op == '0':
                 break
