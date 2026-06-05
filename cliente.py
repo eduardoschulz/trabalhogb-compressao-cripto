@@ -30,10 +30,16 @@ UDP_PORT = 5000
 
 def enviar(sock, dados):
     """
-    funcao para facilitar o sendto + print
+    funcao para facilitar o sendto + print + receber resposta
     """
     sock.sendto(dados.encode(), (UDP_IP, UDP_PORT))
     print("Código enviado para o servidor.")
+    sock.settimeout(5)
+    try:
+        resposta, _ = sock.recvfrom(4096)
+        print(f"Resposta do servidor: {resposta.decode()}")
+    except socket.timeout:
+        print("Sem resposta do servidor.")
 
 
 def menu():
