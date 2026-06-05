@@ -1,4 +1,4 @@
-# Trabalho Prático 1 - Teoria da Informação: Compressão e Criptografia
+# Trabalho Prático 2 - Teoria da Informação: Compressão e Criptografia
 # Alunos: Gabriel Cezar Walber, Renan Zampeze, Arthur Wild, Eduardo Schulz
 import math
 import heapq
@@ -428,44 +428,30 @@ def hamming74_decode(codigo):
     return dados, posicoes_erro
 
 def crc_resto(bits, polinomio="10011"):
-
     dados = list(bits)
 
     for i in range(len(bits) - len(polinomio) + 1):
-
         if dados[i] == '1':
-
             for j in range(len(polinomio)):
-
-                dados[i + j] = str(
-                    int(dados[i + j]) ^
-                    int(polinomio[j])
-                )
+                dados[i + j] = str(int(dados[i + j]) ^ int(polinomio[j]))
 
     return ''.join(dados[-4:])
 
 def crc_encode(bits):
-
     polinomio = "10011"
-
     mensagem = bits + "0000"
-
     crc = crc_resto(mensagem, polinomio)
-
     codeword = bits + crc
 
-    print(f"Dados: {bits}")
-    print(f"CRC:   {crc}")
-    print(f"Codeword: {codeword}")
+    print(f"\nDados:\n{bits}")
+    print(f"\nCRC:\n{crc}")
+    print(f"\nCodeword:\n{codeword}")
 
     return codeword
 
 def crc_decode(codeword):
-
     polinomio = "10011"
-
     resto = crc_resto(codeword, polinomio)
-
     erro = resto != "0000"
 
     return not erro, resto
