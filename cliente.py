@@ -1,6 +1,7 @@
 # Trabalho Prático 2 - Teoria da Informação: Compressão e Criptografia
 # Alunos: Gabriel Cezar Walber, Renan Zampeze, Arthur Wild, Eduardo Schulz
 import socket
+import json
 from modulos.golomb import Golomb
 from modulos.eliasgamma import EliasGamma
 from modulos.fibonacci import Fibonacci
