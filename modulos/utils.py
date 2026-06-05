@@ -44,7 +44,7 @@ def inserir_erro_manual(codigo: str) -> str:
 
 def inserir_erro_auto(codigo: str) -> str:
     lista_bits = list(codigo)
-    n = random.randint(1, len(lista_bits))
+    n = 1
     indices = random.sample(range(len(lista_bits)), n)
     for i in indices:
         lista_bits[i] = '1' if lista_bits[i] == '0' else '0'

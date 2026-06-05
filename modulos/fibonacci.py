@@ -43,7 +43,7 @@ class Fibonacci:
                 num += fib[f]
                 pos += 1
                 f += 1
-                if code[pos] == '1':
+                if pos < len(code) and code[pos] == '1':
                     result += chr(num)
                     num = 0
                     f = -1
