@@ -126,6 +126,8 @@ def menu():
             elif op_te == '3':
                 codigo = Crc.crc_encode(codigo)
                 tipo_crc = "crc"
+                if op_c == '0':
+                    tipo_decode = "crc"
                 print(f"\nCodificado (CRC): {codigo}")
 
             elif op_te == '0':

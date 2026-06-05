@@ -126,6 +126,17 @@ while True:
             print(f"Mensagem recuperada: {mensagem}")
             resposta = mensagem
 
+        elif cab.tipo_decode == "crc":
+            valido, resto = Crc.crc_decode(cab.codigo_crc)
+            if valido:
+                print("  -> Nenhum erro detectado (CRC)")
+            else:
+                print(f"  -> Erro detectado pelo CRC. Resto: {resto}")
+            bits = cab.codigo_crc[:-4]
+            mensagem = bits_para_texto(bits)
+            print(f"Mensagem recuperada: {mensagem}")
+            resposta = mensagem
+            
         else:
             resposta = f"Formato desconhecido: {msg}"
             print(resposta)
