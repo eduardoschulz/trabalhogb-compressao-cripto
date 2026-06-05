@@ -66,17 +66,19 @@ class NoHuffman:
         NoHuffman.huffman_build_codes(no.dir, prefixo + '1', tabela)
         return tabela
 
-    def huffman_encode(self, texto):
+    @staticmethod
+    def huffman_encode(texto):
         """
         Codifica 'texto' com Huffman.
         Retorna (codigo_binario: str, tabela: dict, raiz: NoHuffman).
         """
-        raiz = self.huffman_build_tree(texto)
-        tabela = self.huffman_build_codes(raiz)
+        raiz = NoHuffman.huffman_build_tree(texto)
+        tabela = NoHuffman.huffman_build_codes(raiz)
         codigo = ''.join(tabela[c] for c in texto)
         return codigo, tabela, raiz
 
-    def huffman_decode(self, codigo, raiz):
+    @staticmethod
+    def huffman_decode(codigo, raiz):
         """Decodifica uma string de bits usando a árvore de Huffman."""
         resultado = []
         no_atual = raiz
@@ -85,8 +87,7 @@ class NoHuffman:
             no_atual = no_atual.esq if bit == '0' else no_atual.dir
 
             if no_atual is None:
-                raise ValueError(
-                    "Código inválido — bit inesperado na sequência.")
+                raise ValueError("Código inválido — bit inesperado na sequência.")
 
             if no_atual.simbolo is not None:   # chegou numa folha
                 resultado.append(no_atual.simbolo)
@@ -96,6 +97,6 @@ class NoHuffman:
 
     def testar(self, texto):
         """Codifica e decodifica uma string, printando os resultados."""
-        codigo, tabela, raiz = self.huffman_encode(texto)
+        codigo, tabela, raiz = NoHuffman.huffman_encode(texto)
         print(f"Huffman Codificado: {codigo}")
-        print(f"Huffman Decodificado: {self.huffman_decode(codigo, raiz)}")
+        print(f"Huffman Decodificado: {NoHuffman.huffman_decode(codigo, raiz)}")

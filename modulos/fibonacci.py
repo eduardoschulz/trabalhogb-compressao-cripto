@@ -1,7 +1,6 @@
-
 class Fibonacci:
     def __init__(self):
-        return self
+        pass
 
     @staticmethod
     def fibonacci_encode(mensagem):
@@ -14,17 +13,17 @@ class Fibonacci:
             fib = [1, 2]
             pos = 1
             while fib[pos] <= n:
-                    pos += 1
-                    fib.append(fib[pos-2] + fib[pos-1])
+                pos += 1
+                fib.append(fib[pos-2] + fib[pos-1])
             while pos > 0:
                 pos -= 1
-                if(n >= fib[pos]):
+                if n >= fib[pos]:
                     n -= fib[pos]
                     code = '1' + code
                 else:
                     code = '0' + code
 
-            code += '1' # vira "11" no final
+            code += '1'  # vira "11" no final
             resultado += code
         return resultado
 
@@ -38,7 +37,7 @@ class Fibonacci:
         num = 0
         while pos < len(code):
             if code[pos] == '1':
-                while(len(fib)-1 < f):
+                while len(fib)-1 < f:
                     fib.append(fib[-2] + fib[-1])
                 num += fib[f]
                 pos += 1

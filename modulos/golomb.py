@@ -4,7 +4,7 @@ import math
 
 class Golomb:
     def __init__(self):
-        return self
+        pass
 
     # Validar se entrada é compatível para Golomb
     @staticmethod
@@ -20,9 +20,9 @@ class Golomb:
             resto = dividendo % divisor  # Calcular resto
             prefixo = '0' * quociente + '1'  # Gerar prefixo
 
-        # Calcular número de bits necessários para representar o sufixo
+            # Calcular número de bits necessários para representar o sufixo
             k = math.ceil(math.log2(divisor))
-        # Calcular o limiar para determinar o sufixo
+            # Calcular o limiar para determinar o sufixo
             threshold = (2 ** k) - divisor
 
             if resto < threshold:  # Determinar sufixo com base no limiar

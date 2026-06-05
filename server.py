@@ -2,11 +2,13 @@
 # Alunos: Gabriel Cezar Walber, Renan Zampeze, Arthur Wild, Eduardo Schulz
 import socket
 import ast
+import json
 from modulos.golomb import Golomb
 from modulos.eliasgamma import EliasGamma
 from modulos.fibonacci import Fibonacci
 from modulos.repeticao import Repeticao
 from modulos.hamming import Hamming
+from modulos.crc import Crc
 from modulos.utils import bits_para_texto
 from modulos.cabecalho import Cabecalho
 
@@ -24,14 +26,22 @@ def decodificar_crc(bits, tipo_crc, param_crc):
         return resultado
 
     if tipo_crc == "hamming":
+        tamanho_original = int(param_crc)
         resultado = Hamming.hamming74_decode(bits)
-        # verifica se havia erro re-encodando e comparando
-        recod = Hamming.hamming74_encode(resultado)
+        recod = Hamming.hamming74_encode(resultado[:tamanho_original])
         if recod != bits:
             print("  -> Erros detectados e corrigidos (Hamming)")
         else:
             print("  -> Nenhum erro detectado (Hamming)")
-        return resultado
+        return resultado[:tamanho_original]
+
+    if tipo_crc == "crc":
+        valido, resto = Crc.crc_decode(bits)
+        if valido:
+            print("  -> Nenhum erro detectado (CRC)")
+        else:
+            print(f"  -> Erro detectado pelo CRC. Resto: {resto}")
+        return bits[:-4]
 
     print("  -> CRC não aplicado")
     return bits
@@ -67,7 +77,7 @@ while True:
 
     try:
         if cab.tipo_decode == "golomb":
-            k_str, codigo = cab.codigo_crc.split(":", 1)
+            k_str, codigo = cab.codigo_crc.split("\x00", 1)
             k = int(k_str)
             codigo = decodificar_crc(codigo, cab.tipo_crc, cab.param_crc)
             decodificado = Golomb.golomb_decode(codigo, k)
@@ -90,8 +100,8 @@ while True:
             resposta = decodificado
 
         elif cab.tipo_decode == "huffman":
-            dump, codigo = cab.codigo_crc.split("|", 1)
-            tabela = ast.literal_eval(dump)
+            dump, codigo = cab.codigo_crc.split("\x00", 1)
+            tabela = json.loads(dump)
             codigo = decodificar_crc(codigo, cab.tipo_crc, cab.param_crc)
             decodificado = huffman_decode_from_table(codigo, tabela)
             print(f"Codificado : {codigo}")
@@ -99,7 +109,7 @@ while True:
             resposta = decodificado
 
         elif cab.tipo_decode == "repeticao":
-            r_str, codigo = cab.codigo_crc.split(":", 1)
+            r_str, codigo = cab.codigo_crc.split("\x00", 1)
             r = int(r_str)
             bits = Repeticao.repeticao_decode(codigo, r)
             mensagem = bits_para_texto(bits)
