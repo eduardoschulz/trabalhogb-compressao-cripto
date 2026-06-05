@@ -8,6 +8,21 @@ from modulos.huffman import NoHuffman
 from modulos.repeticao import Repeticao
 from modulos.hamming import Hamming
 from modulos.utils import inserir_erro, texto_para_bits, bits_para_texto
+from modulos.cabecalho import Cabecalho
+
+
+def escolher_crc(codigo):
+    print("\n--- Aplicar CRC? ---")
+    print("1 - Nenhum")
+    print("2 - Repetição")
+    print("3 - Hamming")
+    op = input("Escolha: ")
+    if op == "2":
+        r = int(input("R (ímpar): "))
+        return Repeticao.repeticao_encode(codigo, r), "repeticao", str(r)
+    if op == "3":
+        return Hamming.hamming74_encode(codigo), "hamming", ""
+    return codigo, "none", ""
 
 UDP_IP = "127.0.0.1"
 UDP_PORT = 5000
@@ -47,36 +62,63 @@ def menu():
 
                 codigo = Golomb.golomb_encode(n, k)
                 print(f"\nResultado: {codigo}")
+                codigo, tipo_crc, param_crc = escolher_crc(codigo)
+                print(f"Com CRC: {codigo}")
                 codigo = inserir_erro(codigo)
                 print(f"Resultado com erro: {codigo}")
-                # manda o tipo de encoding ex. golomb: mensagem_encodada
-                enviar(sock, f"golomb:{k}:{codigo}")
+                cab = Cabecalho()
+                cab.tipo_decode = "golomb"
+                cab.tipo_crc = tipo_crc
+                cab.param_crc = param_crc
+                cab.codigo_crc = f"{k}:{codigo}"
+                enviar(sock, cab.empacotar())
 
             elif op == '2':
                 n = input("Digite a mensagem: ")
                 codigo = EliasGamma.elias_gamma_encode(n)
                 print(f"\nCodificado (Elias-Gamma): {codigo}")
+                codigo, tipo_crc, param_crc = escolher_crc(codigo)
+                print(f"Com CRC: {codigo}")
                 codigo = inserir_erro(codigo)
                 print(f"Codificado com erro: {codigo}")
-                enviar(sock, f"eliasgamma:{codigo}")
+                cab = Cabecalho()
+                cab.tipo_decode = "eliasgamma"
+                cab.tipo_crc = tipo_crc
+                cab.param_crc = param_crc
+                cab.codigo_crc = codigo
+                enviar(sock, cab.empacotar())
 
             elif op == '3':
                 n = input("Digite a mensagem: ")
                 codigo = Fibonacci.fibonacci_encode(n)
                 print(f"\nCodificado (Fibonacci): {codigo}")
+                codigo, tipo_crc, param_crc = escolher_crc(codigo)
+                print(f"Com CRC: {codigo}")
                 codigo = inserir_erro(codigo)
                 print(f"Codificado com erro: {codigo}")
-                enviar(sock, f"fibonacci:{codigo}")
+                cab = Cabecalho()
+                cab.tipo_decode = "fibonacci"
+                cab.tipo_crc = tipo_crc
+                cab.param_crc = param_crc
+                cab.codigo_crc = codigo
+                enviar(sock, cab.empacotar())
 
             elif op == '4':
                 n = input("Digite a mensagem: ")
                 h = NoHuffman(None, 0)
                 codigo, tabela, raiz = h.huffman_encode(n)
                 print(f"\nCodificado (Huffman): {codigo}")
+                codigo, tipo_crc, param_crc = escolher_crc(codigo)
+                print(f"Com CRC: {codigo}")
                 codigo = inserir_erro(codigo)
                 print(f"Codificado com erro: {codigo}")
                 dump = str({s: c for s, c in tabela.items()})
-                enviar(sock, f"huffman:{dump}|{codigo}")
+                cab = Cabecalho()
+                cab.tipo_decode = "huffman"
+                cab.tipo_crc = tipo_crc
+                cab.param_crc = param_crc
+                cab.codigo_crc = f"{dump}|{codigo}"
+                enviar(sock, cab.empacotar())
 
             elif op == '5':
                 texto = input("Digite o texto:\n")
@@ -95,7 +137,11 @@ def menu():
                 codigo = inserir_erro(codigo)
                 print(f"\nCom erro:\n{codigo}")
 
-                enviar(sock, f"repeticao:{r}:{codigo}")
+                cab = Cabecalho()
+                cab.tipo_decode = "repeticao"
+                cab.tipo_crc = "none"
+                cab.codigo_crc = f"{r}:{codigo}"
+                enviar(sock, cab.empacotar())
 
             elif op == '6':
                 texto = input("Digite o texto:\n")
@@ -109,7 +155,11 @@ def menu():
                 codigo = inserir_erro(codigo)
                 print(f"\nCom erro:\n{codigo}")
 
-                enviar(sock, f"hamming:{codigo}")
+                cab = Cabecalho()
+                cab.tipo_decode = "hamming"
+                cab.tipo_crc = "none"
+                cab.codigo_crc = codigo
+                enviar(sock, cab.empacotar())
 
             elif op == '0':
                 break
